@@ -4,7 +4,6 @@ fname1	db	'name.txt',0
 fname2 	db	'id.txt',0
 handle1	dw	?
 handle2	dw ?
-
 str1	db	'Enter your name: $'
 max1	db	32
 act1	db	?
@@ -64,6 +63,14 @@ inp2 	db	32 dup('$')
     MOV AH, 0Ch
     INT 21h
 
+    ; Print New Line character
+
+    MOV DX, 13
+    MOV AH,2
+    INT 21h  
+    MOV DX,10
+    MOV AH,2
+    INT 21h
 
     ; Make file ID.txt if it doesn't exist
     
@@ -104,8 +111,5 @@ inp2 	db	32 dup('$')
     ; Close file ID.txt
     MOV AH, 3Eh
     INT 21h
-
-
-
 .exit
 end
