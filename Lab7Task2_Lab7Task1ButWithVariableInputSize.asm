@@ -2,17 +2,25 @@
 .data
     ; Data section contains the messages, the correct username, and password for comparison.
 
-    usn1    db "anub@g.com$" 
-    ; Correct username for comparison
+    msg1    db "Please enter the Username: $:"
 
-    max1    db 20 
+    maxu1    db 20 
     ; Maximum length for input
 
-    act1    db ?
+    actu1    db ?
     ; Placeholder for action
 
-    inp1    db 20 dup ("$") 
+    inpu1    db 20 dup ("$") 
     ; Buffer to store user's input for username
+
+
+    maxu2    db 20 
+    ; Maximum length for input
+
+    actu2    db ?
+    ; Placeholder for action
+
+    inpu2    db 20 dup ("$")
 
     fname1    db "username.txt", 0 
     ; Correct username for comparison
@@ -24,15 +32,21 @@
 
     handle2 dw ?
 
-    msg2    db "enter 5 character long password:$" 
+    msg2    db "enter your password: $" 
     ; Message 2: Prompt to enter the password
 
-    pass1   db "oscar" 
-    ; Correct password for comparison
+    maxp1 db 30
 
-    max2 db 30
+    actp1 db ?
 
-    inp2    db 30 dup ("$") 
+    inpp1    db 30 dup ("$") 
+    ; Buffer to store user's input for password
+
+    maxp2 db 30
+
+    actp2 db ?
+
+    inpp2    db 30 dup ("$") 
     ; Buffer to store user's input for password
 
     msg3    db "hello $" 
@@ -52,7 +66,7 @@
     ; New line characters
 .code
 .startup
-; Take input from the username.txt and store it in inp1.
+; Take input from the username.txt and store it in inpu1.
     mov ah, 3dh
     mov al, 0h
     lea dx, fname1
@@ -61,18 +75,28 @@
 
     mov ah, 3fh
     mov bx, handle1
-    mov cl, max1
+    mov cl, maxu1
     mov ch, 0
-    lea dx, inp1
+    lea dx, inpu1
     int 21h
 
     mov ah, 3eh
     int 21h
-; Compare the username in username.txt with the stored username.
+; Take input of username from user.
+    lea dx, msg1
+    mov ah, 09h
+    int 21h
+    lea dx, maxu2
+    mov ah, 0Ah
+    int 21h
+    lea dx, nline
+    mov ah, 09h
+    int 21h
+; Compare the inpu1 and inpu2.
     cld
-    lea di, inp1
-    lea si, usn1
-    mov cx, 10
+    lea di, inpu1
+    lea si, inpu2
+    mov cx, 11
     repe cmpsb
     jcxz l1
 ; If the username is incorrect, display the "wrong username" message and exit.
@@ -84,17 +108,12 @@
     int 21h
     mov ah, 4ch
     int 21h
-
 ; If username is correct, Prompt the user to input the size of the password
-    lea dx, msg7
+    lea dx, msg2
     mov ah, 09h
     int 21h
-; Take input from user about how long the password is
-    mov ah, 01h
-    int 21h
-    mov cl, al
-    mov ch, 0h
-; If the username is correct, read password from password.txt and store it in inp2
+
+; If the username is correct, read password from password.txt and store it in inpp1
 l1: mov ah, 3dh
     mov al, 0h
     lea dx, fname2
@@ -103,18 +122,37 @@ l1: mov ah, 3dh
 
     mov ah, 3fh
     mov bx, handle2
-    mov cl, max2
+    mov cl, maxp1
     mov ch, 0
-    lea dx, inp2
+    lea dx, inpp1
     int 21h
 
     mov ah, 3eh
     int 21h
-; Compare the entered password with the stored password.
+; Take user input of what the password is.
+    lea dx, msg2
+    mov ah, 09h
+    int 21h
+    mov cx, 30
+    lea di, inpp2
+l2: mov ah, 08h
+    int 21h
+    mov [di], al
+    mov dl, '*'
+    mov ah, 02h
+    int 21h
+    mov bl, '$'
+    cmp [di], bl
+    jz endLoop
+    inc di
+    dec cx
+    jnz l2
+endLoop:
+; Compare value stored in inpp1 and inpp2
     cld
     mov cx, 6
-    lea di, inp2
-    lea si, pass1
+    lea di, inpp2
+    lea si, inpp1
     repe cmpsb
     jcxz l3
 ; If the password is incorrect, display the "wrong password" message and exit.
@@ -127,18 +165,18 @@ l1: mov ah, 3dh
     mov ah, 4ch
     int 21h
 ; If the password is correct, display the greeting message an the username.
-    
 l3: lea dx, nline
     mov ah, 09h
     int 21h
     lea dx, msg3
     mov ah, 09h
     int 21h
-    lea dx, usn1
+    lea dx, inpu1
     mov ah, 09h
     int 21h
     lea dx, nline
     mov ah, 09h
     int 21h
+l4:
 .exit
 end
